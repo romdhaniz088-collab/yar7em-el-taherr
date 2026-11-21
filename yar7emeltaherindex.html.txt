@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>يرحم الطاهر - تطبيق جمع الزيتون</title>
+    <!-- استيراد خط Tajawal العربي العصري من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <!-- تحميل مكتبة Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- إعدادات Tailwind للألوان والخطوط -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        olive: {
+                            50: '#f4f7f2',
+                            100: '#e3ebe0',
+                            200: '#c6d8c0',
+                            300: '#9ebe95',
+                            400: '#749f69',
+                            500: '#538248',
+                            600: '#3f6636',
+                            700: '#33512c',
+                            800: '#2d4a22',
+                            900: '#23361f',
+                            950: '#121d10',
+                        },
+                        gold: {
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                        },
+                        cream: '#faf9f5'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #faf9f5;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 90px; /* مساحة لشريط التنقل السفلي */
+        }
+        /* إخفاء أسهم الزيادة والنقصان الافتراضية لحقول الأرقام لتصميم أنظف */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* تحسين مظهر التمرير */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f7f2;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9ebe95;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased select-none">
+
+    <!-- الترويسة العلوية الثابتة (Header) -->
+    <header class="sticky top-0 z-40 bg-gradient-to-l from-olive-900 via-olive-800 to-[#3a5c28] text-white shadow-lg border-b-2 border-gold-500">
+        <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <!-- أيقونة غصن زيتون مرسومة بـ SVG -->
+                <div class="w-10 h-10 rounded-2xl bg-olive-950/50 border border-gold-400/60 flex items-center justify-center shadow-inner shrink-0">
+                    <svg class="w-6 h-6 text-gold-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9z"/>
+                        <path d="M12 22c-4.97 0-9-4.03-9-9 4.97 0 9 4.03 9 9z"/>
+                        <path d="M12 22V7"/>
+                        <ellipse cx="8.5" cy="8.5" rx="2.5" ry="3.5" transform="rotate(-30 8.5 8.5)" fill="currentColor" fill-opacity="0.35"/>
+                        <ellipse cx="15.5" cy="6.5" rx="2.5" ry="3.5" transform="rotate(30 15.5 6.5)" fill="currentColor" fill-opacity="0.35"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-wide text-gold-400 leading-tight">يرحم الطاهر</h1>
+                    <p class="text-[11px] sm:text-xs font-medium text-olive-100 opacity-95">تطبيق جمع الزيتون</p>
+                </div>
+            </div>
+
+            <!-- مؤشر الحفظ وزر تصفير سريع -->
+            <div class="flex items-center gap-1.5">
+                <div id="saveBadge" class="flex items-center gap-1 bg-olive-950/60 px-2 py-1 rounded-full border border-olive-600/50 text-[10px] text-olive-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>محفوظ</span>
+                </div>
+                <button onclick="openResetModal()" class="bg-rose-600/90 hover:bg-rose-600 active:scale-95 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition flex items-center gap-1" title="بدء يوم جديد وتصفير البيانات">
+                    <span>🔄</span>
+                    <span>يوم جديد</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- الحاوية الرئيسية للشاشات -->
+    <main class="max-w-lg mx-auto px-4 pt-4">
+
+        <!-- ========================================================= -->
+        <!-- الشاشة 1: المصاريف الأولية (Initial Expenses) -->
+        <!-- ========================================================= -->
+        <section id="tab-expenses" class="tab-content space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-extrabold text-olive-900">1. المصاريف الأولية</h2>
+                    <p class="text-xs text-slate-500">سجل تكاليف النقل، الوقود، المؤونة والمعدات</p>
+                </div>
+                <span class="text-xs font-bold bg-olive-100 text-olive-800 px-3 py-1 rounded-full">العملة: د.ت</span>
+            </div>
+
+            <!-- بطاقة إدخال المصاريف -->
+            <div class="bg-white rounded-2xl shadow-sm border border-olive-100 p-4 space-y-4">
+                <!-- كراء السيارة أو الشاحنة -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span class="text-base">🚚</span> كراء السيارة أو الشاحنة
+                    </label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="exp-vehicle" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+
+                <!-- مصاريف البنزين والمحروقات -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span class="text-base">⛽</span> مصاريف البنزين والمحروقات
+                    </label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="exp-fuel" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+
+                <!-- مصاريف الأكل والمؤونة -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span class="text-base">🍞</span> مصاريف الأكل والمؤونة للعمال
+                    </label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="exp-food" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+
+                <!-- مصاريف شراء المعدات -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span class="text-base">🪜</span> مصاريف شراء المعدات (فراش، سلالم، صناديق...)
+                    </label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="exp-equipment" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+
+                <!-- مصاريف إضافية أخرى -->
+                <div class="pt-2 border-t border-dashed border-olive-200">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5 flex items-center gap-2">
+                        <span class="text-base">📝</span> مصاريف إضافية أخرى
+                    </label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <input type="text" id="exp-other-note" placeholder="البيان (اختياري)" 
+                            class="col-span-3 bg-olive-50/60 border border-olive-200 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="saveState()">
+                        <div class="col-span-2 relative">
+                            <input type="number" inputmode="decimal" id="exp-other" placeholder="0" 
+                                class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-3 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                                oninput="updateAllCalculations()">
+                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">د.ت</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقة ملخص المصاريف الأولية -->
+            <div class="bg-gradient-to-br from-olive-800 to-olive-900 text-white rounded-2xl p-5 shadow-md border border-olive-700 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-olive-200 font-medium">مجموع المصاريف الأولية</p>
+                    <p class="text-2xl sm:text-3xl font-black text-gold-400 mt-0.5"><span id="total-initial-expenses">0.00</span> <span class="text-sm font-bold text-white">د.ت</span></p>
+                </div>
+                <button onclick="switchTab('harvest')" class="bg-gold-500 hover:bg-gold-400 text-olive-950 font-extrabold text-xs sm:text-sm px-4 py-3 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
+                    <span>الذهاب للجني</span>
+                    <span>←</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- الشاشة 2: الجني والعمال (الافتراضية عند الفتح) -->
+        <!-- ========================================================= -->
+        <section id="tab-harvest" class="tab-content active space-y-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-extrabold text-olive-900">2. حساب الجني والعمال</h2>
+                    <p class="text-xs text-slate-500">احسب أجور العمال ومرابيح البيع الفورية بالجلبة</p>
+                </div>
+                <span id="current-date-badge" class="text-[11px] font-bold bg-olive-100 text-olive-800 px-2.5 py-1 rounded-full"></span>
+            </div>
+
+            <!-- بطاقة الإعدادات والتسعير الفوري (3 خانات رئيسية + مربع مرابيحي من البيع) -->
+            <div class="bg-gradient-to-b from-amber-50 to-white border-2 border-amber-300/80 rounded-2xl p-3.5 shadow-sm space-y-3">
+                <div class="flex items-center justify-between text-amber-950 font-bold text-xs">
+                    <span class="flex items-center gap-1.5">⚙️ إعدادات التسعير والتحويل:</span>
+                    <span class="text-[10px] text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">قابلة للتعديل</span>
+                </div>
+
+                <!-- الصف الأول: سعر الجلبة للعامل + وزن الجلبة بالكغ -->
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="bg-white rounded-xl p-2.5 border border-amber-200 shadow-2xs">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">سعر الجلبة للعامل</label>
+                        <div class="relative">
+                            <input type="number" inputmode="decimal" id="rate-per-jelba" value="6" 
+                                class="w-full text-xl font-black text-olive-900 bg-transparent focus:outline-none"
+                                oninput="updateAllCalculations()">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">د.ت</span>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-2.5 border border-amber-200 shadow-2xs">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">1 جلبة تساوي بالكغ</label>
+                        <div class="relative">
+                            <input type="number" inputmode="decimal" id="kg-per-jelba" value="14" 
+                                class="w-full text-xl font-black text-olive-900 bg-transparent focus:outline-none"
+                                oninput="updateAllCalculations()">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-800 bg-olive-100 px-2 py-0.5 rounded-md">كغ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الصف الثاني الجديد: سعر الجلبة عند البيع + مربع مرابيحي من البيع في هذه اللحظة -->
+                <div class="grid grid-cols-12 gap-2.5 pt-1 border-t border-amber-200/70">
+                    <!-- خانة سعر الجلبة عند البيع -->
+                    <div class="col-span-5 bg-white rounded-xl p-2.5 border-2 border-emerald-400 shadow-2xs">
+                        <label class="block text-[10px] font-extrabold text-emerald-900 mb-1">سعر الجلبة عند البيع</label>
+                        <div class="relative">
+                            <input type="number" inputmode="decimal" id="sell-price-per-jelba" placeholder="25" 
+                                class="w-full text-xl font-black text-emerald-900 bg-transparent focus:outline-none"
+                                oninput="updateAllCalculations()">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded">د.ت</span>
+                        </div>
+                    </div>
+
+                    <!-- مربع النتيجة الفوري: مرابيحي من البيع في هذه اللحظة -->
+                    <div id="instant-sell-profit-box" class="col-span-7 bg-gradient-to-br from-emerald-700 to-emerald-800 text-white rounded-xl p-2.5 shadow-sm flex flex-col justify-center">
+                        <span class="block text-[10px] font-bold text-emerald-100">مرابيحي من البيع في هذه اللحظة:</span>
+                        <div class="flex items-baseline justify-between mt-0.5">
+                            <span id="instant-jelba-profit" class="text-xl font-black text-gold-400">0.00 <small class="text-xs font-bold text-white">د.ت</small></span>
+                        </div>
+                        <span class="text-[9px] text-emerald-200 mt-0.5">إجمالي البيع: <strong id="instant-jelba-gross">0.00</strong> د.ت</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قائمة المجموعات والعمال -->
+            <div class="space-y-3" id="groups-container">
+                <!-- يتم توليد بطاقات المجموعات ديناميكياً عبر JavaScript -->
+            </div>
+
+            <!-- زر إضافة مجموعة جديدة -->
+            <button onclick="addNewGroup()" class="w-full py-3 rounded-xl border-2 border-dashed border-olive-400 text-olive-800 font-bold text-sm hover:bg-olive-100/60 active:scale-98 transition flex items-center justify-center gap-2">
+                <span class="text-lg leading-none">+</span>
+                <span>إضافة مجموعة / عامل جديد</span>
+            </button>
+
+            <!-- بطاقة ملخص الصفحة الثانية في الأسفل -->
+            <div class="bg-white rounded-2xl shadow-md border-2 border-olive-800 overflow-hidden">
+                <div class="bg-olive-800 text-white px-4 py-2.5 flex items-center justify-between">
+                    <span class="font-bold text-sm">📊 ملخص الجني والأجور والمرابيح</span>
+                    <span class="text-[10px] text-gold-400 font-bold">تحديث مباشر</span>
+                </div>
+                
+                <div class="p-4 space-y-3">
+                    <!-- إجمالي الجلبات والوزن التقديري -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="bg-olive-50 p-3 rounded-xl border border-olive-100">
+                            <span class="block text-[11px] font-bold text-slate-500">إجمالي الجلبات</span>
+                            <span class="text-xl font-black text-olive-900"><span id="summary-total-jelba">0</span> <span class="text-xs font-bold">جلبة</span></span>
+                        </div>
+                        <div class="bg-olive-50 p-3 rounded-xl border border-olive-100">
+                            <span class="block text-[11px] font-bold text-slate-500">إجمالي الوزن التقديري</span>
+                            <span class="text-xl font-black text-olive-900"><span id="summary-total-kg">0</span> <span class="text-xs font-bold">كغ</span></span>
+                        </div>
+                    </div>
+
+                    <!-- إجمالي أجور العمال وقيمة البيع -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                            <span class="block text-[11px] font-bold text-amber-900">إجمالي أجور العمال</span>
+                            <span class="text-lg font-black text-amber-700"><span id="summary-total-wages">0.00</span> <span class="text-xs">د.ت</span></span>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                            <span class="block text-[11px] font-bold text-emerald-900">قيمة البيع بالجلبة</span>
+                            <span class="text-lg font-black text-emerald-700"><span id="summary-jelba-revenue">0.00</span> <span class="text-xs">د.ت</span></span>
+                        </div>
+                    </div>
+
+                    <!-- صافي مرابيح الجني في هذه اللحظة + الفرق بعد المصاريف الأولية -->
+                    <div class="bg-slate-900 text-white p-3.5 rounded-xl space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="block text-xs text-slate-200 font-bold">صافي مرابيح الجني (البيع - الأجور)</span>
+                                <span class="text-[10px] text-slate-400">مرابيحك المباشرة من الجلبات الآن</span>
+                            </div>
+                            <span id="harvest-instant-profit-summary" class="text-xl font-black text-emerald-400">0.00 د.ت</span>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-700/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-300">الصافي بعد خصم المصاريف الأولية (<span id="hint-initial-exp-in-harvest">0</span> د.ت):</span>
+                            <span id="harvest-net-after-initial" class="font-extrabold text-gold-400">0.00 د.ت</span>
+                        </div>
+                    </div>
+
+                    <!-- زر إرسال التلخيص عبر واتساب -->
+                    <button onclick="shareToWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#20bd5a] active:scale-98 text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md transition flex items-center justify-center gap-2.5 text-base">
+                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
+                        </svg>
+                        <span>إرسال التلخيص عبر واتساب</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- الشاشة 3: المعصرة والقطوع (Olive Oil Pressing & Yield) -->
+        <!-- ========================================================= -->
+        <section id="tab-pressing" class="tab-content space-y-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-olive-900">3. المعصرة ونسبة إنتاج الزيت (القطوع)</h2>
+                <p class="text-xs text-slate-500">احسب كم يقطع الزيتون ونسبة الزيت المستخرجة</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-olive-100 p-4 space-y-4">
+                <!-- زر جلب الوزن من صفحة الجني -->
+                <div class="bg-olive-50 border border-olive-200 rounded-xl p-3 flex items-center justify-between">
+                    <div>
+                        <span class="block text-xs font-bold text-olive-900">الوزن التقديري من الجني:</span>
+                        <span class="text-sm font-black text-olive-700"><span id="hint-harvest-kg">0</span> كغ</span>
+                    </div>
+                    <button onclick="syncHarvestWeight()" class="bg-olive-700 hover:bg-olive-800 text-white text-xs font-bold px-3 py-2 rounded-lg shadow-sm active:scale-95 transition">
+                        جلب الوزن من صفحة الجني ↓
+                    </button>
+                </div>
+
+                <!-- وزن الزيتون الصافي في المعصرة -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">⚖️ وزن الزيتون الصافي (كيلوغرام)</label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="press-olive-kg" placeholder="مثال: 1000" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">كغ</span>
+                    </div>
+                </div>
+
+                <!-- كمية الزيت المستخرجة -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">🫒 كمية الزيت المستخرجة (لتر)</label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="press-oil-liters" placeholder="مثال: 220" 
+                            class="w-full bg-amber-50/70 border border-amber-300 rounded-xl px-4 py-3 text-lg font-bold text-amber-950 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-amber-600">لتر</span>
+                    </div>
+                </div>
+
+                <!-- مصاريف العصر -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">🏭 مصاريف العصر (اختياري)</label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="press-cost" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقة نتائج القطوع والنسبة المئوية -->
+            <div class="bg-gradient-to-br from-amber-500 via-gold-500 to-amber-600 text-olive-950 rounded-2xl p-5 shadow-md space-y-4">
+                <div class="flex items-center justify-between border-b border-olive-950/15 pb-3">
+                    <div>
+                        <span class="block text-xs font-extrabold uppercase opacity-80">نسبة إنتاج الزيت (القطوع)</span>
+                        <span class="text-4xl font-black tracking-tight"><span id="yield-percentage">0.0</span>%</span>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-olive-950/10 flex items-center justify-center text-3xl">
+                        💧
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-white/40 backdrop-blur-sm rounded-xl p-3">
+                        <span class="block font-bold opacity-80">معدل التحويل:</span>
+                        <span class="text-sm font-black mt-0.5 block"><span id="kg-per-liter">0.0</span> كغ زيتون = 1 لتر</span>
+                    </div>
+                    <div class="bg-white/40 backdrop-blur-sm rounded-xl p-3">
+                        <span class="block font-bold opacity-80">تقييم المردودية:</span>
+                        <span id="yield-rating" class="text-sm font-black mt-0.5 block">بانتظار البيانات</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- الشاشة 4: حساب المرابيح الصافية (Net Profit Calculator) -->
+        <!-- ========================================================= -->
+        <section id="tab-profit" class="tab-content space-y-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-olive-900">4. المرابيح الصافية للمشروع</h2>
+                <p class="text-xs text-slate-500">الخلاصة المالية الشاملة (بيع الزيت أو بيع الزيتون بالجلبة)</p>
+            </div>
+
+            <!-- وضع احتساب المداخيل -->
+            <div class="bg-white rounded-2xl shadow-sm border border-olive-100 p-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2">مصدر المداخيل الرئيسي:</label>
+                    <div class="grid grid-cols-2 gap-2 bg-olive-50 p-1 rounded-xl border border-olive-200">
+                        <button type="button" id="mode-oil-btn" onclick="setRevenueMode('oil')" class="py-2 px-3 rounded-lg text-xs font-extrabold bg-olive-800 text-white shadow-xs transition">
+                            🫒 بيع زيت الزيتون (باللتر)
+                        </button>
+                        <button type="button" id="mode-jelba-btn" onclick="setRevenueMode('jelba')" class="py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-olive-900 transition">
+                            🧺 بيع الزيتون حباً (بالجلبة)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- حقول بيع الزيت باللتر -->
+                <div id="oil-sale-fields" class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">💰 سعر بيع اللتر الواحد من الزيت (د.ت)</label>
+                        <div class="relative">
+                            <input type="number" inputmode="decimal" id="sell-price-per-liter" placeholder="مثال: 18" 
+                                class="w-full bg-emerald-50/60 border border-emerald-200 rounded-xl px-4 py-3 text-lg font-bold text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                                oninput="updateAllCalculations()">
+                            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700">د.ت / لتر</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-1">كمية الزيت من المعصرة: <strong id="profit-oil-liters-display" class="text-olive-800">0</strong> لتر</p>
+                    </div>
+                </div>
+
+                <!-- ملخص بيع الزيتون بالجلبة (يظهر عند اختيار بيع الجلبة) -->
+                <div id="jelba-sale-fields" class="hidden bg-emerald-50/70 border border-emerald-200 rounded-xl p-3 text-xs space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">إجمالي الجلبات من صفحة الجني:</span>
+                        <strong id="profit-jelba-count-display" class="text-olive-900">0 جلبة</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-600">سعر بيع الجلبة المحدد:</span>
+                        <strong id="profit-jelba-price-display" class="text-olive-900">0 د.ت</strong>
+                    </div>
+                </div>
+
+                <!-- مصاريف إضافية (عبوات، نقل، تخزين...) -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">📦 مصاريف إضافية (عبوات، نقل، تخزين...)</label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="extra-project-costs" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+
+                <!-- مداخيل إضافية -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5">➕ مداخيل إضافية (بيع فيتورة، حطب...)</label>
+                    <div class="relative">
+                        <input type="number" inputmode="decimal" id="other-income" placeholder="0" 
+                            class="w-full bg-olive-50/60 border border-olive-200 rounded-xl px-4 py-3 text-lg font-bold text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition"
+                            oninput="updateAllCalculations()">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ت</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة التفصيل المالي -->
+            <div class="bg-white rounded-2xl shadow-sm border border-olive-200 p-4 space-y-3">
+                <h3 class="text-sm font-extrabold text-olive-900 border-b border-olive-100 pb-2">اللوحة المالية الشاملة</h3>
+                
+                <!-- إجمالي المداخيل -->
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-600 font-medium">إجمالي المداخيل:</span>
+                    <span class="font-extrabold text-emerald-700"><span id="total-revenue">0.00</span> د.ت</span>
+                </div>
+
+                <div class="border-t border-dashed border-slate-200 my-2"></div>
+
+                <!-- المصاريف الأولية -->
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-500">• المصاريف الأولية (نقل، أكل، معدات):</span>
+                    <span class="font-bold text-slate-700"><span id="breakdown-initial">0.00</span> د.ت</span>
+                </div>
+
+                <!-- أجور العمال -->
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-500">• إجمالي أجور العمال (الجني):</span>
+                    <span class="font-bold text-slate-700"><span id="breakdown-wages">0.00</span> د.ت</span>
+                </div>
+
+                <!-- مصاريف المعصرة والإضافات -->
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-500">• مصاريف المعصرة والعبوات والإضافات:</span>
+                    <span class="font-bold text-slate-700"><span id="breakdown-pressing">0.00</span> د.ت</span>
+                </div>
+
+                <!-- مجموع التكاليف الكلية -->
+                <div class="flex justify-between items-center text-sm pt-2 border-t border-slate-200">
+                    <span class="font-bold text-rose-800">إجمالي المصاريف الكلية:</span>
+                    <span class="font-extrabold text-rose-700"><span id="total-all-costs">0.00</span> د.ت</span>
+                </div>
+            </div>
+
+            <!-- بطاقة صافي الربح النهائي -->
+            <div id="final-profit-card" class="bg-emerald-700 text-white rounded-2xl p-6 shadow-lg text-center space-y-1 transition-colors duration-300">
+                <p class="text-xs font-bold uppercase tracking-wider opacity-90">صافي الربح النهائي للمشروع</p>
+                <p class="text-4xl font-black tracking-tight py-1"><span id="final-net-profit">0.00</span> <span class="text-lg font-bold">د.ت</span></p>
+                <p id="profit-status-text" class="text-xs font-medium opacity-90">بانتظار إدخال بيانات البيع والمصاريف</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- شريط التنقل السفلي الثابت (Bottom Navigation Bar) -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-olive-200 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+        <div class="max-w-lg mx-auto grid grid-cols-4 h-16">
+            <button onclick="switchTab('expenses')" id="nav-expenses" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium transition">
+                <span class="text-xl leading-none">🧾</span>
+                <span class="text-[11px]">المصاريف</span>
+            </button>
+            <button onclick="switchTab('harvest')" id="nav-harvest" class="nav-btn active flex flex-col items-center justify-center gap-1 text-olive-800 font-bold transition">
+                <span class="text-xl leading-none">🧺</span>
+                <span class="text-[11px]">الجني والعمال</span>
+            </button>
+            <button onclick="switchTab('pressing')" id="nav-pressing" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium transition">
+                <span class="text-xl leading-none">🫒</span>
+                <span class="text-[11px]">المعصرة والزيت</span>
+            </button>
+            <button onclick="switchTab('profit')" id="nav-profit" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium transition">
+                <span class="text-xl leading-none">💰</span>
+                <span class="text-[11px]">المرابيح الصافية</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- نافذة تأكيد مسح البيانات (Custom Modal بدلاً من alert/confirm) -->
+    <div id="resetModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-2xl">⚠️</div>
+            <h3 class="text-lg font-black text-slate-900">تأكيد مسح البيانات</h3>
+            <p class="text-xs text-slate-600 leading-relaxed">هل أنت متأكد من مسح جميع المصاريف وبيانات الجني والعمال للبدء من جديد؟ لا يمكن التراجع عن هذه الخطوة.</p>
+            <div class="grid grid-cols-2 gap-2.5 pt-2">
+                <button onclick="closeResetModal()" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm">إلغاء</button>
+                <button onclick="confirmResetAll()" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm">نعم، امسح الكل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسالة تنبيه منبثقة (Toast Notification) -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-olive-950 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-opacity duration-300">
+        تم التحديث
+    </div>
+
+    <script>
+        // =========================================================================
+        // الحالة الافتراضية للتطبيق وإدارة التخزين المحلي (State Management)
+        // =========================================================================
+        const STORAGE_KEY = 'yarham_altaher_olive_data_v2';
+
+        let appState = {
+            expenses: {
+                vehicle: '',
+                fuel: '',
+                food: '',
+                equipment: '',
+                other: '',
+                otherNote: ''
+            },
+            harvest: {
+                ratePerJelba: 6,
+                kgPerJelba: 14,
+                sellPricePerJelba: '',
+                groups: [
+                    { id: 1, name: '', jelba: '' },
+                    { id: 2, name: '', jelba: '' },
+                    { id: 3, name: '', jelba: '' },
+                    { id: 4, name: '', jelba: '' }
+                ]
+            },
+            pressing: {
+                oliveKg: '',
+                oilLiters: '',
+                pressingCost: ''
+            },
+            profit: {
+                revenueMode: 'oil', // 'oil' أو 'jelba'
+                sellPricePerLiter: '',
+                extraProjectCosts: '',
+                otherIncome: ''
+            }
+        };
+
+        // تهيئة التطبيق عند التحميل
+        window.onload = function() {
+            loadState();
+            setTodayDate();
+            renderGroups();
+            populateInputsFromState();
+            setRevenueMode(appState.profit.revenueMode || 'oil', false);
+            updateAllCalculations();
+        };
+
+        // عرض تاريخ اليوم في بطاقة الملخص
+        function setTodayDate() {
+            const today = new Date();
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+            document.getElementById('current-date-badge').textContent = today.toLocaleDateString('ar-TN', options);
+        }
+
+        // التنقل بين الشاشات الأربع
+        function switchTab(tabName) {
+            // إخفاء جميع الشاشات
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // إظهار الشاشة المختارة
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            // تحديث أزرار التنقل السفلية
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-olive-800', 'font-bold');
+                btn.classList.add('text-slate-400', 'font-medium');
+            });
+            const activeBtn = document.getElementById('nav-' + tabName);
+            activeBtn.classList.add('active', 'text-olive-800', 'font-bold');
+            activeBtn.classList.remove('text-slate-400', 'font-medium');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // =========================================================================
+        // إدارة المجموعات والعمال في الشاشة الثانية
+        // =========================================================================
+        function renderGroups() {
+            const container = document.getElementById('groups-container');
+            container.innerHTML = '';
+
+            const rate = parseFloat(document.getElementById('rate-per-jelba').value) || 0;
+            const kgFactor = parseFloat(document.getElementById('kg-per-jelba').value) || 0;
+
+            appState.harvest.groups.forEach((group, index) => {
+                const jelbaCount = parseFloat(group.jelba) || 0;
+                const workerPay = (jelbaCount * rate).toFixed(2);
+                const estimatedKg = (jelbaCount * kgFactor).toFixed(0);
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl shadow-sm border border-olive-100 p-3.5 transition hover:border-olive-300';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-olive-800 text-gold-400 text-xs font-black px-2.5 py-1 rounded-lg">مجموعة ${index + 1}</span>
+                            <input type="text" value="${escapeHtml(group.name)}" placeholder="اسم العامل أو رئيس المجموعة..."
+                                class="text-sm font-bold text-slate-800 bg-olive-50/70 border border-olive-200/80 rounded-lg px-2.5 py-1.5 w-44 sm:w-52 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white"
+                                oninput="updateGroupData(${index}, 'name', this.value)">
+                        </div>
+                        ${appState.harvest.groups.length > 1 ? `
+                        <button onclick="removeGroup(${index})" class="text-slate-400 hover:text-rose-500 p-1 text-xs font-bold" title="حذف المجموعة">✕</button>
+                        ` : ''}
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-2.5 items-center">
+                        <!-- 1. حقل إدخال عدد الجلبات -->
+                        <div class="col-span-5">
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">عدد الجلبات</label>
+                            <div class="relative">
+                                <input type="number" inputmode="decimal" value="${group.jelba}" placeholder="0"
+                                    class="w-full bg-olive-50 border border-olive-300 rounded-xl px-3 py-2 text-lg font-black text-olive-950 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white"
+                                    oninput="updateGroupData(${index}, 'jelba', this.value)">
+                                <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-olive-700">جلبة</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. الوزن التقديري بالكيلوغرام -->
+                        <div class="col-span-3 bg-olive-50 border border-olive-200 rounded-xl p-2 text-center">
+                            <span class="block text-[10px] font-bold text-olive-700">الوزن</span>
+                            <span id="group-kg-${index}" class="text-sm font-extrabold text-olive-900">${estimatedKg} <small class="text-[10px]">كغ</small></span>
+                        </div>
+
+                        <!-- 3. أجرة العامل المحسوبة تلقائياً في النهاية -->
+                        <div class="col-span-4 bg-amber-50 border border-amber-200 rounded-xl p-2 text-center">
+                            <span class="block text-[10px] font-bold text-amber-800">أجرة العامل</span>
+                            <span id="group-pay-${index}" class="text-sm sm:text-base font-black text-amber-950">${workerPay} <small class="text-[10px]">د.ت</small></span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // تحديث بيانات مجموعة معينة (الاسم أو عدد الجلبات)
+        function updateGroupData(index, field, value) {
+            if (appState.harvest.groups[index]) {
+                appState.harvest.groups[index][field] = value;
+                updateAllCalculations();
+            }
+        }
+
+        // إضافة مجموعة جديدة
+        function addNewGroup() {
+            const nextId = appState.harvest.groups.length + 1;
+            appState.harvest.groups.push({ id: nextId, name: '', jelba: '' });
+            renderGroups();
+            updateAllCalculations();
+            showToast(`تمت إضافة مجموعة ${nextId}`);
+        }
+
+        // حذف مجموعة
+        function removeGroup(index) {
+            if (appState.harvest.groups.length <= 1) return;
+            appState.harvest.groups.splice(index, 1);
+            renderGroups();
+            updateAllCalculations();
+        }
+
+        // تبديل مصدر المداخيل في الشاشة الرابعة (بيع الزيت باللتر أو بيع الزيتون بالجلبة)
+        function setRevenueMode(mode, shouldUpdate = true) {
+            appState.profit.revenueMode = mode;
+            const oilBtn = document.getElementById('mode-oil-btn');
+            const jelbaBtn = document.getElementById('mode-jelba-btn');
+            const oilFields = document.getElementById('oil-sale-fields');
+            const jelbaFields = document.getElementById('jelba-sale-fields');
+
+            if (mode === 'oil') {
+                oilBtn.className = 'py-2 px-3 rounded-lg text-xs font-extrabold bg-olive-800 text-white shadow-xs transition';
+                jelbaBtn.className = 'py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-olive-900 transition';
+                oilFields.classList.remove('hidden');
+                jelbaFields.classList.add('hidden');
+            } else {
+                jelbaBtn.className = 'py-2 px-3 rounded-lg text-xs font-extrabold bg-olive-800 text-white shadow-xs transition';
+                oilBtn.className = 'py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-olive-900 transition';
+                jelbaFields.classList.remove('hidden');
+                oilFields.classList.add('hidden');
+            }
+
+            if (shouldUpdate) updateAllCalculations();
+        }
+
+        // =========================================================================
+        // الحسابات المركزية الشاملة لجميع الشاشات
+        // =========================================================================
+        function updateAllCalculations() {
+            // 1. قراءة وحساب المصاريف الأولية
+            const vExp = parseFloat(document.getElementById('exp-vehicle').value) || 0;
+            const fExp = parseFloat(document.getElementById('exp-fuel').value) || 0;
+            const foodExp = parseFloat(document.getElementById('exp-food').value) || 0;
+            const eqExp = parseFloat(document.getElementById('exp-equipment').value) || 0;
+            const othExp = parseFloat(document.getElementById('exp-other').value) || 0;
+
+            appState.expenses.vehicle = document.getElementById('exp-vehicle').value;
+            appState.expenses.fuel = document.getElementById('exp-fuel').value;
+            appState.expenses.food = document.getElementById('exp-food').value;
+            appState.expenses.equipment = document.getElementById('exp-equipment').value;
+            appState.expenses.other = document.getElementById('exp-other').value;
+            appState.expenses.otherNote = document.getElementById('exp-other-note').value;
+
+            const totalInitialExpenses = vExp + fExp + foodExp + eqExp + othExp;
+            document.getElementById('total-initial-expenses').textContent = totalInitialExpenses.toFixed(2);
+            document.getElementById('hint-initial-exp-in-harvest').textContent = totalInitialExpenses.toFixed(2);
+
+            // 2. قراءة وحساب الجني والعمال + مرابيح البيع الفورية بالجلبة
+            const ratePerJelba = parseFloat(document.getElementById('rate-per-jelba').value) || 0;
+            const kgPerJelba = parseFloat(document.getElementById('kg-per-jelba').value) || 0;
+            const sellPricePerJelba = parseFloat(document.getElementById('sell-price-per-jelba').value) || 0;
+
+            appState.harvest.ratePerJelba = ratePerJelba;
+            appState.harvest.kgPerJelba = kgPerJelba;
+            appState.harvest.sellPricePerJelba = document.getElementById('sell-price-per-jelba').value;
+
+            let totalJelba = 0;
+            appState.harvest.groups.forEach((group, index) => {
+                const j = parseFloat(group.jelba) || 0;
+                totalJelba += j;
+                const payEl = document.getElementById(`group-pay-${index}`);
+                const kgEl = document.getElementById(`group-kg-${index}`);
+                if (payEl) payEl.innerHTML = `${(j * ratePerJelba).toFixed(2)} <small class="text-[10px]">د.ت</small>`;
+                if (kgEl) kgEl.innerHTML = `${(j * kgPerJelba).toFixed(0)} <small class="text-[10px]">كغ</small>`;
+            });
+
+            const totalHarvestKg = totalJelba * kgPerJelba;
+            const totalWorkerWages = totalJelba * ratePerJelba;
+            const totalJelbaSellRevenue = totalJelba * sellPricePerJelba;
+            const instantJelbaProfit = totalJelbaSellRevenue - totalWorkerWages;
+            const harvestNetAfterInitial = instantJelbaProfit - totalInitialExpenses;
+
+            // تحديث مربع المرابيح الفوري في أعلى صفحة الجني
+            document.getElementById('instant-jelba-gross').textContent = totalJelbaSellRevenue.toFixed(2);
+            const instantProfitEl = document.getElementById('instant-jelba-profit');
+            instantProfitEl.innerHTML = `${instantJelbaProfit.toFixed(2)} <small class="text-xs font-bold text-white">د.ت</small>`;
+
+            const instantBox = document.getElementById('instant-sell-profit-box');
+            if (instantJelbaProfit < 0 && sellPricePerJelba > 0) {
+                instantBox.className = 'col-span-7 bg-gradient-to-br from-rose-700 to-rose-800 text-white rounded-xl p-2.5 shadow-sm flex flex-col justify-center';
+            } else {
+                instantBox.className = 'col-span-7 bg-gradient-to-br from-emerald-700 to-emerald-800 text-white rounded-xl p-2.5 shadow-sm flex flex-col justify-center';
+            }
+
+            // تحديث ملخص أسفل صفحة الجني
+            document.getElementById('summary-total-jelba').textContent = totalJelba;
+            document.getElementById('summary-total-kg').textContent = totalHarvestKg.toFixed(0);
+            document.getElementById('summary-total-wages').textContent = totalWorkerWages.toFixed(2);
+            document.getElementById('summary-jelba-revenue').textContent = totalJelbaSellRevenue.toFixed(2);
+            document.getElementById('hint-harvest-kg').textContent = totalHarvestKg.toFixed(0);
+
+            const harvestInstantSummaryEl = document.getElementById('harvest-instant-profit-summary');
+            harvestInstantSummaryEl.textContent = `${instantJelbaProfit.toFixed(2)} د.ت`;
+            harvestInstantSummaryEl.className = instantJelbaProfit >= 0 ? 'text-xl font-black text-emerald-400' : 'text-xl font-black text-rose-400';
+
+            const harvestAfterInitialEl = document.getElementById('harvest-net-after-initial');
+            harvestAfterInitialEl.textContent = `${harvestNetAfterInitial.toFixed(2)} د.ت`;
+            harvestAfterInitialEl.className = harvestNetAfterInitial >= 0 ? 'font-extrabold text-gold-400' : 'font-extrabold text-rose-400';
+
+            // 3. قراءة وحساب المعصرة والقطوع
+            const oliveKg = parseFloat(document.getElementById('press-olive-kg').value) || 0;
+            const oilLiters = parseFloat(document.getElementById('press-oil-liters').value) || 0;
+            const pressingCost = parseFloat(document.getElementById('press-cost').value) || 0;
+
+            appState.pressing.oliveKg = document.getElementById('press-olive-kg').value;
+            appState.pressing.oilLiters = document.getElementById('press-oil-liters').value;
+            appState.pressing.pressingCost = document.getElementById('press-cost').value;
+
+            let yieldPercent = 0;
+            let kgPerLiter = 0;
+            if (oliveKg > 0 && oilLiters > 0) {
+                yieldPercent = (oilLiters / oliveKg) * 100;
+                kgPerLiter = oliveKg / oilLiters;
+            }
+
+            document.getElementById('yield-percentage').textContent = yieldPercent.toFixed(1);
+            document.getElementById('kg-per-liter').textContent = kgPerLiter.toFixed(1);
+
+            const ratingEl = document.getElementById('yield-rating');
+            if (yieldPercent === 0) {
+                ratingEl.textContent = 'بانتظار البيانات';
+            } else if (yieldPercent >= 22) {
+                ratingEl.textContent = 'ممتاز ما شاء الله 🌟';
+            } else if (yieldPercent >= 18) {
+                ratingEl.textContent = 'جيد جداً 👍';
+            } else {
+                ratingEl.textContent = 'متوسط 👌';
+            }
+
+            // 4. قراءة وحساب المرابيح الصافية للمشروع
+            const sellPriceLiter = parseFloat(document.getElementById('sell-price-per-liter').value) || 0;
+            const extraProjectCosts = parseFloat(document.getElementById('extra-project-costs').value) || 0;
+            const otherIncome = parseFloat(document.getElementById('other-income').value) || 0;
+
+            appState.profit.sellPricePerLiter = document.getElementById('sell-price-per-liter').value;
+            appState.profit.extraProjectCosts = document.getElementById('extra-project-costs').value;
+            appState.profit.otherIncome = document.getElementById('other-income').value;
+
+            document.getElementById('profit-oil-liters-display').textContent = oilLiters;
+            document.getElementById('profit-jelba-count-display').textContent = `${totalJelba} جلبة`;
+            document.getElementById('profit-jelba-price-display').textContent = `${sellPricePerJelba.toFixed(2)} د.ت`;
+
+            let primaryRevenue = 0;
+            if (appState.profit.revenueMode === 'oil') {
+                primaryRevenue = oilLiters * sellPriceLiter;
+            } else {
+                primaryRevenue = totalJelbaSellRevenue;
+            }
+
+            const totalRevenue = primaryRevenue + otherIncome;
+            const totalPressingAndExtras = pressingCost + extraProjectCosts;
+            const totalAllCosts = totalInitialExpenses + totalWorkerWages + totalPressingAndExtras;
+            const netProfit = totalRevenue - totalAllCosts;
+
+            document.getElementById('total-revenue').textContent = totalRevenue.toFixed(2);
+            document.getElementById('breakdown-initial').textContent = totalInitialExpenses.toFixed(2);
+            document.getElementById('breakdown-wages').textContent = totalWorkerWages.toFixed(2);
+            document.getElementById('breakdown-pressing').textContent = totalPressingAndExtras.toFixed(2);
+            document.getElementById('total-all-costs').textContent = totalAllCosts.toFixed(2);
+
+            document.getElementById('final-net-profit').textContent = netProfit.toFixed(2);
+
+            const finalCard = document.getElementById('final-profit-card');
+            const statusText = document.getElementById('profit-status-text');
+
+            if (netProfit > 0) {
+                finalCard.className = 'bg-emerald-700 text-white rounded-2xl p-6 shadow-lg text-center space-y-1 transition-colors duration-300';
+                statusText.textContent = 'مشروع رابح بإذن الله 🌿';
+            } else if (netProfit < 0) {
+                finalCard.className = 'bg-rose-700 text-white rounded-2xl p-6 shadow-lg text-center space-y-1 transition-colors duration-300';
+                statusText.textContent = 'التكاليف تتجاوز المداخيل المسجلة حالياً';
+            } else {
+                finalCard.className = 'bg-olive-800 text-white rounded-2xl p-6 shadow-lg text-center space-y-1 transition-colors duration-300';
+                statusText.textContent = 'نقطة التعادل (المداخيل تساوي المصاريف)';
+            }
+
+            saveState();
+        }
+
+        // جلب الوزن التقديري إلى صفحة المعصرة
+        function syncHarvestWeight() {
+            const totalKg = document.getElementById('summary-total-kg').textContent;
+            document.getElementById('press-olive-kg').value = totalKg;
+            updateAllCalculations();
+            showToast(`تم نقل ${totalKg} كغ إلى حقل المعصرة`);
+        }
+
+        // =========================================================================
+        // مشاركة التلخيص عبر واتساب (WhatsApp Integration)
+        // =========================================================================
+        function shareToWhatsApp() {
+            const today = new Date().toLocaleDateString('ar-TN');
+            const rate = parseFloat(document.getElementById('rate-per-jelba').value) || 0;
+            const sellJelbaPrice = parseFloat(document.getElementById('sell-price-per-jelba').value) || 0;
+            const totalJelba = document.getElementById('summary-total-jelba').textContent;
+            const totalKg = document.getElementById('summary-total-kg').textContent;
+            const totalWages = document.getElementById('summary-total-wages').textContent;
+            const jelbaRevenue = document.getElementById('summary-jelba-revenue').textContent;
+            const instantProfit = document.getElementById('harvest-instant-profit-summary').textContent;
+
+            let message = `🫒 *يرحم الطاهر - تطبيق جمع الزيتون* 🫒\n`;
+            message += `📅 التاريخ: ${today}\n`;
+            message += `━━━━━━━━━━━━━━━\n`;
+            message += `👷‍♂️ *تفاصيل الجني والعمال* (أجرة الجلبة: ${rate} د.ت):\n`;
+
+            let hasWorkers = false;
+            appState.harvest.groups.forEach((g, i) => {
+                const j = parseFloat(g.jelba) || 0;
+                if (j > 0 || g.name.trim() !== '') {
+                    hasWorkers = true;
+                    const workerName = g.name.trim() ? g.name.trim() : `مجموعة ${i + 1}`;
+                    const pay = (j * rate).toFixed(2);
+                    message += `• ${workerName}: ${j} جلبة ⬅️ *${pay} د.ت*\n`;
+                }
+            });
+
+            if (!hasWorkers) {
+                message += `• لم يتم إدخال كميات بعد\n`;
+            }
+
+            message += `━━━━━━━━━━━━━━━\n`;
+            message += `🧺 إجمالي الجلبات: *${totalJelba} جلبة*\n`;
+            message += `⚖️ الوزن الكلي التقديري: *${totalKg} كغ*\n`;
+            message += `💵 إجمالي أجور العمال: *${totalWages} د.ت*\n`;
+            if (sellJelbaPrice > 0) {
+                message += `🏷️ سعر الجلبة عند البيع: *${sellJelbaPrice} د.ت*\n`;
+                message += `📈 إجمالي ثمن البيع: *${jelbaRevenue} د.ت*\n`;
+                message += `💰 مرابيح البيع الصافية: *${instantProfit}*\n`;
+            }
+            message += `━━━━━━━━━━━━━━━\n`;
+            message += `تم الإنشاء عبر تطبيق *يرحم الطاهر*`;
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // =========================================================================
+        // الحفظ والاسترجاع من LocalStorage
+        // =========================================================================
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+            } catch (e) {
+                console.error('Error saving state:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    appState = { ...appState, ...parsed };
+                }
+            } catch (e) {
+                console.error('Error loading state:', e);
+            }
+        }
+
+        function populateInputsFromState() {
+            document.getElementById('exp-vehicle').value = appState.expenses.vehicle || '';
+            document.getElementById('exp-fuel').value = appState.expenses.fuel || '';
+            document.getElementById('exp-food').value = appState.expenses.food || '';
+            document.getElementById('exp-equipment').value = appState.expenses.equipment || '';
+            document.getElementById('exp-other').value = appState.expenses.other || '';
+            document.getElementById('exp-other-note').value = appState.expenses.otherNote || '';
+
+            document.getElementById('rate-per-jelba').value = appState.harvest.ratePerJelba ?? 6;
+            document.getElementById('kg-per-jelba').value = appState.harvest.kgPerJelba ?? 14;
+            document.getElementById('sell-price-per-jelba').value = appState.harvest.sellPricePerJelba || '';
+
+            document.getElementById('press-olive-kg').value = appState.pressing.oliveKg || '';
+            document.getElementById('press-oil-liters').value = appState.pressing.oilLiters || '';
+            document.getElementById('press-cost').value = appState.pressing.pressingCost || '';
+
+            document.getElementById('sell-price-per-liter').value = appState.profit.sellPricePerLiter || '';
+            document.getElementById('extra-project-costs').value = appState.profit.extraProjectCosts || '';
+            document.getElementById('other-income').value = appState.profit.otherIncome || '';
+        }
+
+        // =========================================================================
+        // أدوات مساعدة (Reset Modal & Toast)
+        // =========================================================================
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmResetAll() {
+            localStorage.removeItem(STORAGE_KEY);
+            appState = {
+                expenses: { vehicle: '', fuel: '', food: '', equipment: '', other: '', otherNote: '' },
+                harvest: {
+                    ratePerJelba: 6,
+                    kgPerJelba: 14,
+                    sellPricePerJelba: '',
+                    groups: [
+                        { id: 1, name: '', jelba: '' },
+                        { id: 2, name: '', jelba: '' },
+                        { id: 3, name: '', jelba: '' },
+                        { id: 4, name: '', jelba: '' }
+                    ]
+                },
+                pressing: { oliveKg: '', oilLiters: '', pressingCost: '' },
+                profit: { revenueMode: 'oil', sellPricePerLiter: '', extraProjectCosts: '', otherIncome: '' }
+            };
+            populateInputsFromState();
+            setRevenueMode('oil', false);
+            renderGroups();
+            updateAllCalculations();
+            closeResetModal();
+            showToast('تم تصفير جميع البيانات وبدء يوم جديد');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>
